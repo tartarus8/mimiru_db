@@ -11,8 +11,19 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+set(SOURCES
+    src/core/schema.cpp
+)
 
-add_executable(prog ${SOURCES})
+set(TESTS
+    tests/pager_test.cpp
+)
 
-target_include_directories(prog PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+add_executable(prog src/main.cpp ${SOURCES})
+add_executable(test_pager ${TESTS} ${SOURCES})
+
+enable_testing()
+
+target_include_directories(prog PRIVATE src include)
+target_include_directories(test_pager PRIVATE src include)
+add_test(NAME PagerTest COMMAND test_pager)
