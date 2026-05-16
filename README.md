@@ -1,91 +1,70 @@
 # mimiru_db
-Academic database management system made with C++ and will
+Academic Database Management System written in modern C++ (C++17).
 
 ## Overview
 The system implements a two-level hierarchical data storage (Databases $\rightarrow$ Tables $\rightarrow$ Records) supporting integer and string data types. It features rigid schema typing, integrity constraints (`NOT NULL`, `INDEXED`), and a custom SQL-like query language.
 
-The architecture strictly follows SOLID principles, separating physical storage, indexing mechanisms, and query execution.
+The architecture strictly follows SOLID principles and modern C++ best practices, featuring a custom **Disk Pager**, a persistent **B+ Tree**, and a fully decoupled **Lexer-Parser-Executor** pipeline for query processing.
 
 ## Project Structure
 
-The codebase is organized by architectural layers (domains):
+The codebase is strictly separated into interface (`include/`) and implementation (`src/`) directories, organized by architectural domains:
 
 ```text
-dbms-bplus-tree/
-├── CMakeLists.txt          # Modern CMake build configuration
-├── README.md               # This documentation file
-└── src/                    # Application source code
-    ├── core/               # Base abstractions: Data Types, Schema, Constraints
-    ├── storage/            # Physical storage layer (I/O, Page Management)
-    ├── index/              # Indexing mechanisms (B+ Tree implementation)
-    ├── engine/             # Core DB logic: Table management, validation
-    ├── query/              # Query Processor: SQL-like Parser and Executor
-    └── main.cpp            # Entry point (Interactive & Batch mode handlers)
+mimiru_db/
+├── CMakeLists.txt              # Modern Target-based CMake configuration
+├── README.md                   # This documentation file
+├── include/mimiru/             # Public API & Headers
+│   ├── core/                   # Overlays, Data Types, Schema, Exceptions
+│   ├── storage/                # Physical storage layer (Pager, Disk I/O)
+│   ├── index/                  # Indexing mechanisms (B+ Tree)
+│   ├── engine/                 # Table manipulation, System & DB Manager
+│   └── query/                  # Lexer, Parser (AST definitions)
+├── src/                        # Implementations
+│   ├── storage/pager.cpp
+│   ├── index/bplus_tree.cpp
+│   ├── engine/
+│   ├── query/
+│   └── main.cpp                # Entry point (Interactive & Batch loops)
+└── tests/                      # Google Test Suite (GTest)
+    ├── CMakeLists.txt
+    ├── test_storage.cpp
+    ├── test_bplus_tree.cpp
+    ├── test_engine.cpp
+    └── test_parser.cpp
 ```
 
 ## Build and Run Instructions
 
-The project uses **CMake** as its build system. It requires a compiler that supports **C++17** (e.g., GCC, Clang, or MSVC).
+The project uses **CMake** (v3.14+) and strictly enforces **C++17**.
+*Note: The build system automatically fetches `GoogleTest` and `nlohmann/json` from GitHub via `FetchContent`. An internet connection is required for the first configuration.*
 
 ### 1. Build the project
-Open your terminal in the root directory of the project and run the following commands:
+Open your terminal in the root directory and run:
 
 ```bash
-# Generate build files in the 'build' directory
+# Generate build files
 cmake -B build
 
-# Compile the project
+# Compile the project and tests
 cmake --build build
 ```
 
 ### 2. Run the application
-The application supports two modes according to the requirements:
+The application supports two modes according to the technical requirements:
 
-**Interactive Mode** (reads queries from terminal):
+**Interactive Mode** (REPL reading from terminal):
 ```bash
-# Linux / macOS
 ./build/prog
-
-# Windows (PowerShell)
-.\build\Debug\prog.exe
 ```
 
-**Batch Mode** (executes queries from a text file):
+**Batch Mode** (Executes sequential queries from a file):
 ```bash
 ./build/prog path/to/script.txt
 ```
 
-## TODO List / Implementation Roadmap
-
-### Phase 1: MVP & Core Data Structures (WIP)
--[x] Define base data types using `std::variant` and `std::optional`.
-- [x] Implement Table Schema and column definitions.
-- [x] Add DML validation logic (Type checking, `NOT NULL` constraints).
--[x] Implement In-Memory Storage mock for early testing.
-- [ ] Implement `FileStorageManager` for binary disk I/O (Persistence).
-
-### Phase 2: Indexing (Variant 2)
-- [ ] Design B+ Tree node structures (saving to disk).
-- [ ] Implement B+ Tree `insert` (Node splitting).
-- [ ] Implement B+ Tree `remove` (Node merging/borrowing).
-- [ ] Implement B+ Tree `find` and `findRange`.
-- [ ] Integrate B+ Tree into the `Table` class (Indexes must only store `RecordId`).
-
-### Phase 3: Query Processing (SQL-like)
-- [ ] Implement Lexer/Tokenizer for the custom SQL syntax.
-- [ ] Implement Parser to generate Abstract Syntax Trees (AST).
-- [ ] Implement query semantic validation.
-- [ ] Implement Query Executor.
-- [ ] Format `SELECT` query outputs as JSON arrays.
-
-### Phase 4: Application Interface
--[x] CLI skeleton.
-- [ ] Interactive REPL loop with proper error handling.
-- [ ] Batch script parsing and execution.
-
-### Phase 5: Extra Requirements (Course Tasks)
-- [ ] **[10] Default Values:** Support `DEFAULT[value]` in `CREATE TABLE`.
-- [ ] **[11] Complex WHERE:** Support boolean logic (`AND`, `OR`) and parentheses `(...)`.
-- [ ] **[12] Aggregations:** Support `SUM`, `COUNT`, `AVG` in `SELECT` queries.
-- [ ] **[0] Temporal Persistence:** Support `REVERT` to rollback database state (No full snapshots allowed).
-- [ ] **[0] String Interning:** Optimize memory by deduplicating string values.
+### 3. Run the Test Suite
+The storage engine, B+ Tree logic, and parsers are heavily covered by unit tests. To run them:
+```bash
+./build/tests/mimiru_tests
+```

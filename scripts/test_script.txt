@@ -1,0 +1,9 @@
+CREATE DATABASE test_db;
+USE test_db;
+CREATE TABLE users (
+id INT INDEXED,
+age INT NOT_NULL
+);
+INSERT INTO users (id, age) VALUE (1, 25), (2, 30);
+SELECT * FROM users;
+DROP DATABASE test_db;
